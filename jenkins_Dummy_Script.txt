@@ -8,25 +8,22 @@ stage('Generate payload')
 steps
 {
   script {
-          env.USERNAME = input message: 'Please enter the username',
-                             parameters: [string(defaultValue: 'lisa.jones',
-                                          description: '',
-                                          name: 'Username')]
-          env.PASSWORD = input message: 'Please enter the password',
-                             parameters: [password(defaultValue: '',
-                                          description: '',
-                                          name: 'Password')]
- 	  env.REPORTNAME = input message: 'Please enter the report to be migrated',
-                             parameters: [string(defaultValue: 'ss.xdmz',
-                                          description: '',
-                                          name: 'Reportname')]
-	  env.PATHTODEPLOY = input message: 'Please enter the report path',
-                             parameters: [string(defaultValue: '/Custom/Shomit',
-                                          description: '',
-                                          name: 'Pathtodeploy')]
-                                          bat """ java EncodeToBase64  ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} ${env.PASSWORD} """
+    def userInput = input message: 'Please enter the following details:',
+        parameters: [
+            string(defaultValue: 'lisa.jones', description: 'Username', name: 'Username'),
+            string(defaultValue: '', description: 'Password', name: 'Password'),
+            string(defaultValue: 'ss.xdmz', description: 'Reportname', name: 'Reportname'),
+            string(defaultValue: '/Custom/Shomit', description: 'Pathtodeploy', name: 'Pathtodeploy')
+        ]
 
-        }
+    env.USERNAME = userInput.Username
+    env.PASSWORD = userInput.Password
+    env.REPORTNAME = userInput.Reportname
+    env.PATHTODEPLOY = userInput.Pathtodeploy
+
+    bat "java EncodeToBase64 ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} ${env.PASSWORD}"
+}
+
    
 
     
