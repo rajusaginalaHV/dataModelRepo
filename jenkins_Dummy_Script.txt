@@ -9,27 +9,32 @@ steps
 {
   script {
           env.USERNAME = input message: 'Please enter the username',
-                             parameters: [string(defaultValue: 'lisa.jones',
+                             parameters: [string(defaultValue: '',
                                           description: '',
                                           name: 'Username')]
           env.PASSWORD = input message: 'Please enter the password',
-                             parameters: [password(defaultValue: '',
+                             parameters: [string(defaultValue: '',
                                           description: '',
                                           name: 'Password')]
  	  env.REPORTNAME = input message: 'Please enter the report to be migrated',
-                             parameters: [string(defaultValue: 'ss.xdmz',
+                             parameters: [string(defaultValue: '',
                                           description: '',
                                           name: 'Reportname')]
-	  env.PATHTODEPLOY = input message: 'Please enter the report path',
-                             parameters: [string(defaultValue: '/Custom/Shomit',
+	  env.PATHTODEPLOY = input message: 'Please enter the report path', 
+                             parameters: [string(defaultValue: '',
                                           description: '',
                                           name: 'Pathtodeploy')]
-                                          bat(returnStdout: true, script: " java EncodeToBase64  ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} \"${env.PASSWORD}\" ")
 
         }
+		echo "${env.REPORTNAME}"
+		echo "${env.USERNAME}"
+		echo "${env.PASSWORD}"
+		echo "${env.PATHTODEPLOY}"
    
 
-    
+      bat """
+         java EncodeToBase64  ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} \"${env.PASSWORD}\"
+      """ 
 }
 }
 stage('Move BI object to cataloag server') 
@@ -40,7 +45,7 @@ script{
 
      
 
-      status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
+      status_code = bat(returnStdout: true, script: "curl --output output.gzip -w '%{http_code}' --silent --header 'Content-Type:application/xml' -d @Payload.xml https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim()
                        
       echo "HTTP response status code: ${status_code}"
 
