@@ -1,66 +1,53 @@
+// script for paramterized job/build with pwd handler
+def addPercentage(String input) {
+   StringBuilder result = new StringBuilder()
+		for (int i = 0; i < input.length(); i++) {
+			if (input.charAt(i) == '%') {
+				result.append('%')
+            }
+			result.append(input.charAt(i))
+		}
+        return result.toString()
+}
+
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage('Generate payload') {
-      steps {
-        script {
-          
-          def value1 = ['/Custom/DemoJenkins1', 'Custom_Path']
-          def value2 = ['/Custom/Interns_2023/DemoJenkins2', 'Interns_Path']
-          def value3 = ['/Custom/Raju/DemoJenkins3', 'Raju_new_path']
-		  
-	      def choices = [value1[1], value2[1], value3[1]]
+    stages {
+        stage('Generate payload') {
+            steps {
+                script {
+                    def hasPercentage = ${PASSWORD}.contains('%')
 
-          // Initialize environment variables
-          env.USERNAME = ''
-          env.PASSWORD = ''
-          env.REPORTNAME = ''
-          env.selectedValue = ''
+                    echo "Has Percentage: ${hasPercentage}"
+					
+					
+                    if (hasPercentage) {
+					    echo "Original pwd: ${PASSWORD}"
+						PASSWORD=addPercentage(${PASSWORD})
+						echo "Modifed pwd : ${PASSWORD}"
+                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${REPORTPATH} ${USERNAME} \"${PASSWORD}\" "
+                    }
 
-          def userInput = input(
-            id: 'userInput',
-            message: 'Enter the required information',
-            parameters: [
-              string(defaultValue: 'lisa.jones', description: 'Please enter the username', name: 'USERNAME'),
-              string(defaultValue: 'oUf3F%4%', description: 'Please enter the password', name: 'PASSWORD'),
-              string(defaultValue: 'ss.xdmz', description: 'Please enter the report name', name: 'REPORTNAME'),
-              choice(choices: choices, description: 'Please enter the report path', name: 'SELECTED_VALUE')
-            ]
-          )
-
-         selectedValue = [value1, value2, value3].find { value -> value[1] == userInput.SELECTED_VALUE}[0]
-		  
-
-          // Store user input in environment variables
-          env.USERNAME = userInput.USERNAME
-          env.PASSWORD = userInput.PASSWORD
-          env.REPORTNAME = userInput.REPORTNAME
-	  
-		      echo "Username: ${env.USERNAME}"
-          echo "Password: ${env.PASSWORD}"
-          echo "Report Name: ${env.REPORTNAME}"
-          echo "Selected Value: ${env.selectedValue}"
-
-          bat"""
-		    java EncodeToBase64 ${env.REPORTNAME} Payload.xml ${env.selectedValue} ${env.USERNAME} ${env.PASSWORD}
-		  """
+                    echo "Username: ${USERNAME}"
+                    echo "Report Name: ${REPORTNAME}"
+                    echo "Selected Value: ${REPORTPATH}"
+                }
+            }
         }
-      }
-    }
-    
-    stage('Move BI object to catalog server') {
-      steps {
-        script {
-          status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-eseu-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
-          
-          echo "HTTP response status code: ${status_code}"
-    
-          if (status_code != "200") {
-            error('URL status different from 200. Exiting script. Please refer to output.gzip')
-          }
+
+        stage('Move BI object to catalog server') {
+            steps {
+                script {
+                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
+
+                    echo "HTTP response status code: ${status_code}"
+
+                    if (status_code != "200") {
+                        error('URL status different from 200. Exiting script. Please refer to output.gzip')
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }
