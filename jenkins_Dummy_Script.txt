@@ -17,14 +17,14 @@ pipeline {
         stage('Generate payload') {
             steps {
                 script {
-                    def hasPercentage = ${PASSWORD}.contains('%')
+                    def hasPercentage = (params.PASSWORD).contains('%')
 
                     echo "Has Percentage: ${hasPercentage}"
 					
 					
                     if (hasPercentage) {
 					    echo "Original pwd: ${PASSWORD}"
-						PASSWORD=addPercentage(${PASSWORD})
+						PASSWORD=addPercentage(params.PASSWORD)
 						echo "Modifed pwd : ${PASSWORD}"
                         bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${REPORTPATH} ${USERNAME} \"${PASSWORD}\" "
                     }
