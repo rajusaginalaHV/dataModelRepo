@@ -1,0 +1,62 @@
+Successfull Build:
+
+pipeline
+{
+agent any
+stages
+{
+stage('Generate payload')
+{
+steps
+{
+  script {
+    def userInput = input message: 'Please enter the following details:',
+        parameters: [
+            string(defaultValue: 'lisa.jones', description: 'Username', name: 'Username'),
+            string(defaultValue: '', description: 'Password', name: 'Password'),
+            string(defaultValue: 'ss.xdmz', description: 'Reportname', name: 'Reportname'),
+            string(defaultValue: '/Custom/Shomit', description: 'Pathtodeploy', name: 'Pathtodeploy')
+			
+        ]
+
+    env.USERNAME = userInput.Username
+    env.PASSWORD = userInput.Password
+    env.REPORTNAME = userInput.Reportname
+    env.PATHTODEPLOY = userInput.Pathtodeploy
+	
+	
+    echo "Username: ${env.USERNAME}"
+    echo "Password: ${env.PASSWORD}"
+    echo "Report Name: ${env.REPORTNAME}"
+    echo "Selected Value: ${env.PATHTODEPLOY}"
+
+    bat "java EncodeToBase64 ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} ${env.PASSWORD}"
+}
+
+   
+
+    
+}
+}
+stage('Move BI object to cataloag server') 
+{
+steps
+{
+script{
+
+     
+
+       status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
+                       
+      echo "HTTP response status code: ${status_code}"
+
+      if (status_code != "200") {
+          error('URL status different of 200. Exiting script.Plese refer output.gzip')
+      } 
+}
+
+
+}
+}
+}
+}
