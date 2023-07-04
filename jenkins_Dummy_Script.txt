@@ -20,6 +20,10 @@ steps
     env.PASSWORD = userInput.Password
     env.REPORTNAME = userInput.Reportname
     env.PATHTODEPLOY = userInput.Pathtodeploy
+    echo "Username: ${env.USERNAME}"
+    echo "Password: ${env.PASSWORD}"
+    echo "Report Name: ${env.REPORTNAME}"
+    echo "Selected Value: ${env.PATHTODEPLOY}"
 
     bat "java EncodeToBase64 ${env.REPORTNAME} Payload.xml ${env.PATHTODEPLOY} ${env.USERNAME} ${env.PASSWORD}"
 }
