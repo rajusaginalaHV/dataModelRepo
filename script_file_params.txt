@@ -17,7 +17,7 @@ pipeline {
         stage('Generate payload') {
             steps {
                 script {
-			def pwd = params.PASSWORD
+			def pwd = (params.PASSWORD).toString()
                     def hasPercentage = (pwd).contains('%')
 
                     echo "Has Percentage: ${hasPercentage}"
