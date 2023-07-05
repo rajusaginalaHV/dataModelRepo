@@ -34,9 +34,10 @@ pipeline {
 				
 					// Set the URL of the SOAP web service
 					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
-
+						
+					reportname=${REPORTNAME}..replace(".xdmz", ".xdm")
  
-					def reportObjectAbsolutePath="/Custom/${REPORTNAME}.xdm"
+					def reportObjectAbsolutePath="/Custom/${reportname}"
 					
 					// Set the OBJECT EXIST SOAP request payload
 					def soapRequest = 
