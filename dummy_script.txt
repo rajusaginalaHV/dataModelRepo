@@ -66,18 +66,7 @@ pipeline {
 						echo "Object Exists \n delete object"
 						def soapRequest2 = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:v2=\"http://xmlns.oracle.com/oxp/service/v2\"> \r\n <soapenv:Header/> \r\n <soapenv:Body> \r\n <v2:deleteObject> \r\n <v2:objectAbsolutePath>" + reportObjectAbsolutePath + "</v2:objectAbsolutePath> \r\n <v2:userID>" + ${USERNAME} + "</v2:userID> \r\n <v2:password>" + ${PASSWORD} + "</v2:password> \r\n </v2:deleteObject> \r\n </soapenv:Body> \r\n </soapenv:Envelope>"
 
-						def soapRequest2 = '''
-							<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
-							<soapenv:Header/>
-							<soapenv:Body>
-								<v2:deleteObject>
-									<v2:objectAbsolutePath>${reportObjectAbsolutePath}</v2:objectAbsolutePath>
-									<v2:userID>${USERNAME}</v2:userID>
-									<v2:password>${PASSWORD}</v2:password>
-								</v2:deleteObject>
-							</soapenv:Body>
-							</soapenv:Envelope>
-						'''
+						
 						// Write the SOAP request to a file
 						writeFile file: 'deleteObject_SoapRequest.xml', text: soapRequest
 						
