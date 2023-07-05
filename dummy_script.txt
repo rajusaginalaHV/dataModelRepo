@@ -2,19 +2,24 @@ pipeline {
     agent any
 
     stages {
-        stage('Store File Names') {
+        
+
+        stage('Store File Names and invoke pipeline') {
             steps {
                 script {
                     def files = bat(script: 'git ls-files', returnStdout: true).trim().split("\\r?\\n")
                     def txtFiles = []
                     files.each { file ->
-                        if (file.endsWith('.txt')) {
+                        if (file.endsWith('.xdmz')) {
                             txtFiles.add(file)
                         }
                     }
                     echo "Text Files: ${txtFiles}"
+					
+					build job: 'callFunc', parameters: txtFiles
                 }
             }
         }
+		
     }
 }
