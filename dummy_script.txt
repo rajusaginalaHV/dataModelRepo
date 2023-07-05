@@ -2,20 +2,21 @@ pipeline {
     agent any
 
     stages {
-        stage('Call CatalogService API') {
+        stage('Exist Object') {
             steps {
                 script {
-                    def apiUrl = 'https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService'
+                    def apiUrl = 'https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService'
                     def requestBody = '''
                         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
-                            <soapenv:Header/>
-                            <soapenv:Body>
-                                <v2:existObject>
-                                    <v2:in0>your_object_path</v2:in0>
-                                    <v2:in1>your_object_type</v2:in1>
-                                </v2:existObject>
-                            </soapenv:Body>
-                        </soapenv:Envelope>
+   <soapenv:Header/>
+   <soapenv:Body>
+      <v2:objectExist>
+         <v2:reportObjectAbsolutePath>${REPORTPATH}</v2:reportObjectAbsolutePath>
+         <v2:userID>${USERNAME}</v2:userID>
+         <v2:password>${PASSWORD}</v2:password>
+      </v2:objectExist>
+   </soapenv:Body>
+</soapenv:Envelope>
                     '''
 
                     def response = httpRequest(
