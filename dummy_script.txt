@@ -1,39 +1,53 @@
+// script for paramterized job/build with pwd handler
+def passwordHandler(String input) {
+   StringBuilder result = new StringBuilder()
+		for (int i = 0; i < input.length(); i++) {
+			if (input.charAt(i) == '%') {
+				result.append('%')
+            }
+			result.append(input.charAt(i))
+		}
+        return result.toString()
+}
+
 pipeline {
     agent any
 
     stages {
-        stage('Exist Object') {
+        stage('Generate payload') {
             steps {
                 script {
-                    def apiUrl = 'https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService'
-                    def requestBody = '''
-                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <v2:objectExist>
-         <v2:reportObjectAbsolutePath>${REPORTPATH}</v2:reportObjectAbsolutePath>
-         <v2:userID>${USERNAME}</v2:userID>
-         <v2:password>${PASSWORD}</v2:password>
-      </v2:objectExist>
-   </soapenv:Body>
-</soapenv:Envelope>
-                    '''
-
-                    def response = httpRequest(
-                        url: apiUrl,
-                        contentType: 'text/xml',
-                        requestBody: requestBody
-                    )
-
-                    if (response.status == 200) {
-                        def responseBody = response.content
-                        // Process the response as needed
-                        echo "API response: ${responseBody}"
-                    } else {
-                        error "API call failed with status ${response.status}"
+					def pwd = (params.PASSWORD).toString()
+                    def hasPercentage = (pwd).contains('%')
+					
+                    if (hasPercentage) {
+					    echo "Original pwd: ${PASSWORD}"
+						PASSWORD=passwordHandler(pwd)
+						echo "Modifed pwd : ${PASSWORD}"
+                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${REPORTPATH} ${USERNAME} \"${PASSWORD}\" "
                     }
+
+                    echo "Username: ${USERNAME}"
+                    echo "Report Name: ${REPORTNAME}"
+                    echo "Selected Value: ${REPORTPATH}"
                 }
             }
         }
+		stage('Check Exist Object'){
+		     def existObjectPayload = """
+                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
+						<soapenv:Header/>
+							<soapenv:Body>
+								<v2:objectExist>
+									<v2:reportObjectAbsolutePath>"/Custom/${REPORTNAME}.xdm"</v2:reportObjectAbsolutePath>
+									<v2:userID>${USERNAME}</v2:userID>
+									<v2:password>${PASSWORD}</v2:password>
+								</v2:objectExist>
+						</soapenv:Body>
+						</soapenv:Envelope>
+                    """
+			def response = bat(script: 'curl -s -X POST -H "Content-Type: application/xml" --data "@existObjectPayload.xml" "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService/existObject"',returnStdout: true)
+			echo "${response}"
+		}
     }
 }
