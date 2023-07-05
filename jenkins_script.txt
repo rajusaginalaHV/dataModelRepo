@@ -1,4 +1,5 @@
 // script for paramterized job/build with pwd handler
+// and handles object existance case
 def passwordHandler(String input) {
    StringBuilder result = new StringBuilder()
 		for (int i = 0; i < input.length(); i++) {
