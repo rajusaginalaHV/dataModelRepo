@@ -35,10 +35,10 @@ pipeline {
 					// Set the URL of the SOAP web service
 					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
 						
-					reportname=(params.REPORTNAME).replace(".xdmz", ".xdm")
+					reportname=((params.REPORTNAME)+".xdm")
 					
-					def reportObjectAbsolutePath = (params.PATHTODEPLOY}.toString()).substring(0, input.lastIndexOf("/") + 1)+reportname
-					// def reportObjectAbsolutePath="/Custom/${reportname}"
+					// def reportObjectAbsolutePath = (params.PATHTODEPLOY}.toString()).substring(0, input.lastIndexOf("/") + 1)+reportname
+					def reportObjectAbsolutePath=reportname
 					
 					
 					
