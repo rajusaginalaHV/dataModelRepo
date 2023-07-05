@@ -35,23 +35,103 @@ pipeline {
         }
 		stage('Check Exist Object'){
 		steps {
-                script {
-						def existObjectPayload = """
-									<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
-									<soapenv:Header/>
-										<soapenv:Body>
-											<v2:objectExist>
-												<v2:reportObjectAbsolutePath>"/Custom/${REPORTNAME}"</v2:reportObjectAbsolutePath>
-												<v2:userID>${USERNAME}</v2:userID>
-												<v2:password>${PASSWORD}</v2:password>
-											</v2:objectExist>
-									</soapenv:Body>
-									</soapenv:Envelope>
-								"""
-							def response = bat(script: 'curl -s -X POST -H "Content-Type: application/xml" --data "@existObjectPayload.xml" "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService/existObject"',returnStdout: true)
-							echo "${response}"
+				script {
+					// Set the URL of the SOAP web service
+					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
+
+ 
+					def reportObjectAbsolutePath="/Custom/${REPORTNAME}.xdm"
+					
+					// Set the OBJECT EXIST SOAP request payload
+					def soapRequest = 
+					'''
+						<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
+						<soapenv:Header/>
+						<soapenv:Body>
+							<v2:objectExist>
+								<v2:reportObjectAbsolutePath>${reportObjectAbsolutePath}</v2:reportObjectAbsolutePath>
+								<v2:userID>${USERNAME}</v2:userID>
+								<v2:password>${PASSWORD}</v2:password>
+							</v2:objectExist>
+						</soapenv:Body>
+						</soapenv:Envelope>
+					'''
+						
+						
+						
+					// Write the SOAP request to a file
+					writeFile file: 'object_exist_soap_request.xml', text: soapRequest
+					
+					
+					
+					// Execute the SOAP web service call using curl
+					def objectexist_command = "curl --header 'Content-Type: text/xml' --data @object_exist_soap_request.xml ${serviceUrl}"
+					def object_exist_soap_response = bat(returnStdout: true, script: objectexist_command)
+					
+					
+					
+					// Print the SOAP response
+					echo "Object exist soap response"
+					println object_exist_soap_response
+					writeFile file: 'object_exist_soap_response.xml', text: response
+					
+					if(response.contains("<objectExistReturn>true</objectExistReturn>")){
+						echo "Object Exists \n delete object"
+						def soapRequest2 = '''
+							<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
+							<soapenv:Header/>
+							<soapenv:Body>
+								<v2:deleteObject>
+									<v2:objectAbsolutePath>${reportObjectAbsolutePath}</v2:objectAbsolutePath>
+									<v2:userID>${USERNAME}</v2:userID>
+									<v2:password>${PASSWORD}</v2:password>
+								</v2:deleteObject>
+							</soapenv:Body>
+							</soapenv:Envelope>
+						'''
+						// Write the SOAP request to a file
+						writeFile file: 'deleteObject_SoapRequest.xml', text: soapRequest
+						
+						
+						
+						// Execute the SOAP web service call using curl
+						def deleteObjectcommand = "curl --header 'Content-Type: text/xml' --data @deleteObject_SoapRequest.xml ${serviceUrl}"
+						def deleteObject_soap_response = bat(returnStdout: true, script: deleteObjectcommand)
+						
+						
+						
+						// Print the SOAP response
+						println deleteObject_soap_response
+						
+					}
+					
+					else{
+						echo "Object doesn't exist \n Uploading object"
+					}
+						
+					
+					
+					
+					
+					
+					// Save the SOAP response to a file
+					writeFile file: 'delete_object_soap_response.xml', text: response
 				}
 			}
 		}
+		stage('Move BI object to catalog server') {
+            steps {
+                script {
+                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
+
+                    echo "HTTP response status code: ${status_code}"
+
+                    if (status_code != "200") {
+                        error('URL status different from 200. Exiting script. Please refer to output.gzip')
+                    }
+                }
+            }
+        }
+		
     }
 }
