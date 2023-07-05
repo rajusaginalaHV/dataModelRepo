@@ -40,6 +40,9 @@ pipeline {
 					// def reportObjectAbsolutePath = (params.PATHTODEPLOY}.toString()).substring(0, input.lastIndexOf("/") + 1)+reportname
 					def reportObjectAbsolutePath=reportname
 					
+					println reportname
+					println reportObjectAbsolutePath
+					
 					
 					
 					// Set the OBJECT EXIST SOAP request payload
