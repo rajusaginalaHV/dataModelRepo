@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Store File Names') {
+            steps {
+                script {
+                    def files = bat(script: 'git ls-files', returnStdout: true).trim().split("\\r?\\n")
+                    def txtFiles = []
+                    files.each { file ->
+                        if (file.endsWith('.txt')) {
+                            txtFiles.add(file)
+                        }
+                    }
+                    echo "Text Files: ${txtFiles}"
+                }
+            }
+        }
+    }
+}
