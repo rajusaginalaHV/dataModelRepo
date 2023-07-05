@@ -34,20 +34,24 @@ pipeline {
             }
         }
 		stage('Check Exist Object'){
-		     def existObjectPayload = """
-                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
-						<soapenv:Header/>
-							<soapenv:Body>
-								<v2:objectExist>
-									<v2:reportObjectAbsolutePath>"/Custom/${REPORTNAME}"</v2:reportObjectAbsolutePath>
-									<v2:userID>${USERNAME}</v2:userID>
-									<v2:password>${PASSWORD}</v2:password>
-								</v2:objectExist>
-						</soapenv:Body>
-						</soapenv:Envelope>
-                    """
-			def response = bat(script: 'curl -s -X POST -H "Content-Type: application/xml" --data "@existObjectPayload.xml" "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService/existObject"',returnStdout: true)
-			echo "${response}"
+		steps {
+                script {
+						def existObjectPayload = """
+									<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
+									<soapenv:Header/>
+										<soapenv:Body>
+											<v2:objectExist>
+												<v2:reportObjectAbsolutePath>"/Custom/${REPORTNAME}"</v2:reportObjectAbsolutePath>
+												<v2:userID>${USERNAME}</v2:userID>
+												<v2:password>${PASSWORD}</v2:password>
+											</v2:objectExist>
+									</soapenv:Body>
+									</soapenv:Envelope>
+								"""
+							def response = bat(script: 'curl -s -X POST -H "Content-Type: application/xml" --data "@existObjectPayload.xml" "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService/existObject"',returnStdout: true)
+							echo "${response}"
+				}
+			}
 		}
     }
 }
