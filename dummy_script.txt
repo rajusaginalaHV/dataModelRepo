@@ -30,12 +30,8 @@ pipeline {
                     echo "Username: ${USERNAME}"
                     echo "Report Name: ${REPORTNAME}"
                     echo "Selected Value: ${REPORTPATH}"
-                }
-            }
-        }
-		stage('Check Exist Object'){
-		steps {
-				script {
+                
+				
 					// Set the URL of the SOAP web service
 					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
 
@@ -71,7 +67,7 @@ pipeline {
 					
 					
 					// Print the SOAP response
-					echo "Object exist soap response"
+					
 					println object_exist_soap_response
 					writeFile file: 'object_exist_soap_response.xml', text: response
 					
