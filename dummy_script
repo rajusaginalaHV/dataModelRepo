@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Call CatalogService API') {
+            steps {
+                script {
+                    def apiUrl = 'https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService'
+                    def requestBody = '''
+                        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v2="http://xmlns.oracle.com/oxp/service/v2">
+                            <soapenv:Header/>
+                            <soapenv:Body>
+                                <v2:existObject>
+                                    <v2:in0>your_object_path</v2:in0>
+                                    <v2:in1>your_object_type</v2:in1>
+                                </v2:existObject>
+                            </soapenv:Body>
+                        </soapenv:Envelope>
+                    '''
+
+                    def response = httpRequest(
+                        url: apiUrl,
+                        contentType: 'text/xml',
+                        requestBody: requestBody
+                    )
+
+                    if (response.status == 200) {
+                        def responseBody = response.content
+                        // Process the response as needed
+                        echo "API response: ${responseBody}"
+                    } else {
+                        error "API call failed with status ${response.status}"
+                    }
+                }
+            }
+        }
+    }
+}
