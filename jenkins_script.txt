@@ -26,6 +26,9 @@ pipeline {
 						echo "Modifed pwd : ${PASSWORD}"
                         bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${PATHTODEPLOY} ${USERNAME} \"${PASSWORD}\" "
                     }
+					
+					// reportname => ss.xdmz
+					// pathtodeploy => /Custom/test1/
 
                     echo "Username: ${USERNAME}"
                     echo "Report Name: ${REPORTNAME}"
@@ -37,8 +40,9 @@ pipeline {
 						
 					def actualreportname = (params.REPORTNAME).replace(".xdmz",".xdm")
 					
-					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+(actualreportname))
+					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+"/"+(actualreportname))
 					
+					// /Custom/test1/ss.xdmz
 					println reportObjectAbsolutePath
 					
 					
