@@ -1,5 +1,4 @@
 // script for paramterized job/build with pwd handler
-// and handles object existance case
 def passwordHandler(String input) {
    StringBuilder result = new StringBuilder()
 		for (int i = 0; i < input.length(); i++) {
@@ -36,7 +35,9 @@ pipeline {
 					// Set the URL of the SOAP web service
 					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
 						
-					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+".xdm")
+					def actualreportname = (params.REPORTNAME).replace(".xdmz",".xdm")
+					
+					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+(actualreportname))
 					
 					println reportObjectAbsolutePath
 					
