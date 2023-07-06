@@ -117,7 +117,7 @@ pipeline {
 		stage('Move BI object to catalog server') {
             steps {
                 script {
-                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml ${serviceUrl}").trim().split("\n")[1]
+                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
 
                     echo "HTTP response status code: ${status_code}"
 
