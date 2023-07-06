@@ -20,15 +20,18 @@ pipeline {
 					def pwd = (params.PASSWORD).toString()
                     def hasPercentage = (pwd).contains('%')
 					
+					// /Custom/test1/ss.xdmz
+					def tmp=(params.PATHTODEPLOY).toString()+"/"+(params.REPORTNAME).toString().replace(".xdmz","")
+					
                     if (hasPercentage) {
 					    echo "Original pwd: ${PASSWORD}"
 						PASSWORD=passwordHandler(pwd)
 						echo "Modifed pwd : ${PASSWORD}"
-                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${PATHTODEPLOY} ${USERNAME} \"${PASSWORD}\" "
+                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${tmp} ${USERNAME} \"${PASSWORD}\" "
                     }
 					
 					// reportname => ss.xdmz
-					// pathtodeploy => /Custom/test1/
+					// pathtodeploy => /Custom/test1
 
                     echo "Username: ${USERNAME}"
                     echo "Report Name: ${REPORTNAME}"
