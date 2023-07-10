@@ -33,7 +33,7 @@ pipeline {
                 
 				
 					// Set the URL of the SOAP web service
-					def serviceUrl = (params.SERVICE_URL).toString()+":443/xmlpserver/services/v2/CatalogService"
+					env.serviceUrl = (params.SERVICE_URL).toString()+":443/xmlpserver/services/v2/CatalogService"
 						
 					def actualreportname = (params.REPORTNAME).replace(".xdmz",".xdm")
 					
@@ -56,7 +56,7 @@ pipeline {
 					
 					
 					// Execute the SOAP web service call using curl
-					def objectexist_command = "curl --silent --header 'Content-Type: text/xml' --data @object_exist_soap_request.xml ${serviceUrl}"
+					def objectexist_command = "curl --silent --header 'Content-Type: text/xml' --data @object_exist_soap_request.xml ${env.serviceUrl}"
 					def object_exist_soap_response = bat(returnStdout: true, script: objectexist_command)
 					
 					
@@ -79,7 +79,7 @@ pipeline {
 						
 						
 						// Execute the SOAP web service call using curl
-						def deleteObjectcommand = "curl --silent --header 'Content-Type: text/xml' --data @deleteObject_SoapRequest.xml ${serviceUrl}"
+						def deleteObjectcommand = "curl --silent --header 'Content-Type: text/xml' --data @deleteObject_SoapRequest.xml ${env.serviceUrl}"
 						def deleteObject_soap_response = bat(returnStdout: true, script: deleteObjectcommand)
 						
 						
@@ -110,7 +110,7 @@ pipeline {
 		stage('Move BI object to catalog server') {
             steps {
                 script {
-                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml ${serviceUrl}").trim().split("\n")[1]
+                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml ${env.serviceUrl}").trim().split("\n")[1]
 
                     echo "HTTP response status code: ${status_code}"
 
