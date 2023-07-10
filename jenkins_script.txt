@@ -17,21 +17,15 @@ pipeline {
         stage('Generate payload') {
             steps {
                 script {
-					def pwd = (params.PASSWORD).toString()
+		    def pwd = (params.PASSWORD).toString()
                     def hasPercentage = (pwd).contains('%')
 					
-					// /Custom/test1/ss.xdmz
-					def tmp=(params.PATHTODEPLOY).toString()+"/"+(params.REPORTNAME).toString().replace(".xdmz","")
-					
                     if (hasPercentage) {
-					    // echo "Original pwd: ${PASSWORD}"
+					    echo "Original pwd: ${PASSWORD}"
 						PASSWORD=passwordHandler(pwd)
-						// echo "Modifed pwd : ${PASSWORD}"
-                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${tmp} ${USERNAME} \"${PASSWORD}\" "
+						echo "Modifed pwd : ${PASSWORD}"
+                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${PATHTODEPLOY} ${USERNAME} \"${PASSWORD}\" "
                     }
-					
-					// reportname => ss.xdmz
-					// pathtodeploy => /Custom/test1
 
                     echo "Username: ${USERNAME}"
                     echo "Report Name: ${REPORTNAME}"
@@ -39,13 +33,12 @@ pipeline {
                 
 				
 					// Set the URL of the SOAP web service
-					def serviceUrl = "https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService"
+					def serviceUrl = (params.SERVICE_URL).toString()+":443/xmlpserver/services/v2/CatalogService"
 						
 					def actualreportname = (params.REPORTNAME).replace(".xdmz",".xdm")
 					
-					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+"/"+(actualreportname))
+					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+(actualreportname))
 					
-					// /Custom/test1/ss.xdmz
 					println reportObjectAbsolutePath
 					
 					
@@ -117,7 +110,7 @@ pipeline {
 		stage('Move BI object to catalog server') {
             steps {
                 script {
-                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml https://fa-erzp-dev12-saasfademo1.ds-fa.oraclepdemos.com:443/xmlpserver/services/v2/CatalogService").trim().split("\n")[1]
+                    status_code = bat(returnStdout: true, script: "curl --output output.gzip -w \"%%{http_code}\" --silent --header \"Content-Type:application/xml\" -d @Payload.xml ${serviceUrl}").trim().split("\n")[1]
 
                     echo "HTTP response status code: ${status_code}"
 
