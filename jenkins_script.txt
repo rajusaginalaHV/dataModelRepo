@@ -1,4 +1,4 @@
-// script for paramterized job/build with pwd handler
+// script for Data Model migration
 def passwordHandler(String input) {
    StringBuilder result = new StringBuilder()
 		for (int i = 0; i < input.length(); i++) {
@@ -17,19 +17,18 @@ pipeline {
         stage('Generate payload') {
             steps {
                 script {
-		    def pwd = (params.PASSWORD).toString()
+					def pwd = (params.PASSWORD).toString()
                     def hasPercentage = (pwd).contains('%')
 					
-                    if (hasPercentage) {
-					    echo "Original pwd: ${PASSWORD}"
+					// /Custom/test1 +/+ ss.xdoz
+					def tmp=(params.PATHTODEPLOY).toString()+"/"+(params.REPORTNAME).toString().replace(".xdmz","")
+                    
+					if (hasPercentage) {
 						PASSWORD=passwordHandler(pwd)
-						echo "Modifed pwd : ${PASSWORD}"
-                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${PATHTODEPLOY} ${USERNAME} \"${PASSWORD}\" "
+                        bat " java EncodeToBase64  ${REPORTNAME} Payload.xml ${tmp} ${USERNAME} \"${PASSWORD}\" "
                     }
 
-                    echo "Username: ${USERNAME}"
-                    echo "Report Name: ${REPORTNAME}"
-                    echo "Selected Value: ${PATHTODEPLOY}"
+                    
                 
 				
 					// Set the URL of the SOAP web service
@@ -37,7 +36,7 @@ pipeline {
 						
 					def actualreportname = (params.REPORTNAME).replace(".xdmz",".xdm")
 					
-					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+(actualreportname))
+					def reportObjectAbsolutePath=((params.PATHTODEPLOY)+"/"+(actualreportname))
 					
 					println reportObjectAbsolutePath
 					
